@@ -114,7 +114,7 @@
   };
 
   try {
-    const res = await fetch('http://localhost:4000/api/reviews', {
+    const res = await fetch('https://early-wind-headphones.glitch.me/api/reviews', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(payload),
@@ -136,7 +136,7 @@ let isAdmin = false;
 
     window.addEventListener('DOMContentLoaded', async () => {
   try {
-    const res = await fetch('http://localhost:4000/api/reviews');
+    const res = await fetch('https://early-wind-headphones.glitch.me/api/reviews');
     const reviews = await res.json();
     reviews.forEach(renderReviewCard);
   } catch (err) {
