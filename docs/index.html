@@ -126,7 +126,15 @@ nameInput.addEventListener('input', validateForm);
 reviewInput.addEventListener('input', validateForm);
 
 // Also check once when the page loads
-window.addEventListener('DOMContentLoaded', validateForm);
+// Run validation after DOM fully loads AND allow a slight delay to ensure fields are ready
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(validateForm, 50); // give time for inputs to register
+});
+
+// Check when typing
+nameInput.addEventListener('input', validateForm);
+reviewInput.addEventListener('input', validateForm);
+
 
 
     // Submit review to Firestore
