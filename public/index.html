@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leave a Review</title>
+  <!-- Firebase Core -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
   <style>
     body {
       font-family: sans-serif;
@@ -87,6 +91,21 @@
   </form>
 
   <div id="reviews-container"></div>
+<script>
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyCnUft1W23MA4Wpx6mzo6IGIBl65Nx4SP0",
+    authDomain: "cowel-reviews.firebaseapp.com",
+    projectId: "cowel-reviews",
+    storageBucket: "cowel-reviews.firebasestorage.app",
+    messagingSenderId: "1048377700597",
+    appId: "1:1048377700597:web:9ca74c4698f88e957e55bc"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
 
   <script>
 
@@ -160,6 +179,7 @@ function renderReviewCard(r) {
 
 
   </script>
+
 
 </body>
 </html>
