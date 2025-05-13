@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <title>Admin Dashboard – Reviews</title>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
   <style>
     body {
       font-family: sans-serif;
@@ -38,25 +43,39 @@
 <body>
 
   <h1>Admin Review Dashboard</h1>
-
   <div id="reviews-container"></div>
 
   <script>
-    const reviewsContainer = document.getElementById('reviews-container');
+    // Protect with admin key
     const adminKey = prompt("Enter Admin Key:");
-
     if (adminKey !== 'Collins1975') {
       document.body.innerHTML = "<h2 style='color:red;'>Unauthorized</h2>";
       throw new Error("Unauthorized");
     }
 
-    // Fetch and display all reviews
-    async function loadReviews() {
-      const res = await fetch('https://early-wind-headphones.glitch.me/api/reviews');
-      const reviews = await res.json();
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnUft1W23MA4Wpx6mzo6IGIBl65Nx4SP0",
+      authDomain: "cowel-reviews.firebaseapp.com",
+      projectId: "cowel-reviews",
+      storageBucket: "cowel-reviews.firebasestorage.app",
+      messagingSenderId: "1048377700597",
+      appId: "1:1048377700597:web:9ca74c4698f88e957e55bc"
+    };
 
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const reviewsContainer = document.getElementById('reviews-container');
+
+    // Fetch and render reviews
+    db.collection('reviews').orderBy('date', 'desc').onSnapshot(snapshot => {
       reviewsContainer.innerHTML = '';
-      reviews.forEach(r => {
+      snapshot.forEach(doc => {
+        const r = doc.data();
+        const id = doc.id;
+
         const card = document.createElement('div');
         card.className = 'review-card';
         card.innerHTML = `
@@ -64,35 +83,25 @@
             <span>${r.name}</span>
             <span>${'★'.repeat(r.rating)}</span>
           </div>
-          <div style="color:gray; font-size:12px;">${r.date}</div>
+          <div style="color:gray; font-size:12px;">${new Date(r.date).toLocaleString()}</div>
           <p>${r.text}</p>
           <button class="delete-btn">Delete</button>
         `;
 
-        // Delete button logic
         card.querySelector('.delete-btn').addEventListener('click', async () => {
-          const confirmDelete = confirm("Delete this review?");
-          if (!confirmDelete) return;
-
-          const res = await fetch(`https://early-wind-headphones.glitch.me/api/reviews/${r.id}`, {
-            method: 'DELETE',
-            headers: {
-              'x-admin-key': adminKey
-            }
-          });
-
-          if (res.ok) {
+          if (!confirm('Delete this review?')) return;
+          try {
+            await db.collection('reviews').doc(id).delete();
             card.remove();
-          } else {
-            alert("Failed to delete review");
+          } catch (err) {
+            console.error('Error deleting review:', err);
+            alert('Failed to delete review');
           }
         });
 
         reviewsContainer.append(card);
       });
-    }
-
-    loadReviews();
+    });
   </script>
 </body>
 </html>
