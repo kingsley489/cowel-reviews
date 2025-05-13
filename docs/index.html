@@ -108,80 +108,69 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const form = document.getElementById('review-form');
-    const nameInput = document.getElementById('name');
-    const ratingSelect = document.getElementById('rating');
-    const reviewInput = document.getElementById('review');
-    const submitBtn = document.getElementById('submit-btn');
-    const reviewsContainer = document.getElementById('reviews-container');
+    window.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('review-form');
+      const nameInput = document.getElementById('name');
+      const ratingSelect = document.getElementById('rating');
+      const reviewInput = document.getElementById('review');
+      const submitBtn = document.getElementById('submit-btn');
+      const reviewsContainer = document.getElementById('reviews-container');
 
- function validateForm() {
-  const nameFilled = nameInput.value.trim().length > 0;
-  const reviewFilled = reviewInput.value.trim().length > 0;
-  submitBtn.disabled = !(nameFilled && reviewFilled);
-}
-
-// Check on input
-nameInput.addEventListener('input', validateForm);
-reviewInput.addEventListener('input', validateForm);
-
-// Also check once when the page loads
-// Run validation after DOM fully loads AND allow a slight delay to ensure fields are ready
-window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(validateForm, 50); // give time for inputs to register
-});
-
-// Check when typing
-nameInput.addEventListener('input', validateForm);
-reviewInput.addEventListener('input', validateForm);
-
-
-
-    // Submit review to Firestore
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const payload = {
-        name: nameInput.value.trim(),
-        rating: parseInt(ratingSelect.value),
-        text: reviewInput.value.trim(),
-        date: new Date().toISOString()
+      // Validation
+      const validateForm = () => {
+        const nameFilled = nameInput.value.trim().length > 0;
+        const reviewFilled = reviewInput.value.trim().length > 0;
+        submitBtn.disabled = !(nameFilled && reviewFilled);
       };
 
-      try {
-        await db.collection('reviews').add(payload);
-        alert('Review submitted!');
-        form.reset();
-        submitBtn.disabled = true;
-      } catch (err) {
-        console.error('Error submitting review:', err);
-        alert('Failed to submit review. Try again.');
-      }
-    });
+      nameInput.addEventListener('input', validateForm);
+      reviewInput.addEventListener('input', validateForm);
 
-    // Fetch & display reviews
-    db.collection('reviews')
-      .orderBy('date', 'desc')
-      .onSnapshot(snapshot => {
-        reviewsContainer.innerHTML = '';
-        snapshot.forEach(doc => {
-          renderReviewCard(doc.data());
-        });
+      // Initial state check (in case of autofill)
+      setTimeout(validateForm, 100);
+
+      // Form submission
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        const payload = {
+          name: nameInput.value.trim(),
+          rating: parseInt(ratingSelect.value),
+          text: reviewInput.value.trim(),
+          date: new Date().toISOString()
+        };
+
+        try {
+          await db.collection('reviews').add(payload);
+          alert('Review submitted!');
+          form.reset();
+          submitBtn.disabled = true;
+        } catch (err) {
+          console.error('Error submitting review:', err);
+          alert('Failed to submit review. Try again.');
+        }
       });
 
-    function renderReviewCard(r) {
-      const card = document.createElement('div');
-      card.className = 'review-card';
-      card.innerHTML = `
-        <div class="review-header">
-          <span>${r.name}</span>
-          <span class="stars">${'★'.repeat(r.rating)}</span>
-        </div>
-        <div class="date">${new Date(r.date).toLocaleString()}</div>
-        <p>${r.text}</p>
-      `;
-      reviewsContainer.append(card);
-    }
+      // Load and render reviews
+      db.collection('reviews')
+        .orderBy('date', 'desc')
+        .onSnapshot(snapshot => {
+          reviewsContainer.innerHTML = '';
+          snapshot.forEach(doc => {
+            const r = doc.data();
+            const card = document.createElement('div');
+            card.className = 'review-card';
+            card.innerHTML = `
+              <div class="review-header">
+                <span>${r.name}</span>
+                <span class="stars">${'★'.repeat(r.rating)}</span>
+              </div>
+              <div class="date">${new Date(r.date).toLocaleString()}</div>
+              <p>${r.text}</p>
+            `;
+            reviewsContainer.append(card);
+          });
+        });
+    });
   </script>
-
 </body>
 </html>
