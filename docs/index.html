@@ -115,11 +115,19 @@
     const submitBtn = document.getElementById('submit-btn');
     const reviewsContainer = document.getElementById('reviews-container');
 
-    [nameInput, reviewInput].forEach(el => {
-      el.addEventListener('input', () => {
-        submitBtn.disabled = !(nameInput.value.trim() && reviewInput.value.trim());
-      });
-    });
+ function validateForm() {
+  const nameFilled = nameInput.value.trim().length > 0;
+  const reviewFilled = reviewInput.value.trim().length > 0;
+  submitBtn.disabled = !(nameFilled && reviewFilled);
+}
+
+// Check on input
+nameInput.addEventListener('input', validateForm);
+reviewInput.addEventListener('input', validateForm);
+
+// Also check once when the page loads
+window.addEventListener('DOMContentLoaded', validateForm);
+
 
     // Submit review to Firestore
     form.addEventListener('submit', async e => {
