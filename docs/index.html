@@ -5,96 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leave a Review</title>
 
-  <!-- Firebase -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 2rem;
-    }
-    label {
-      display: flex;
-      flex-direction: column;
-      font-size: 14px;
-    }
-    input, select, textarea {
-      padding: 8px;
-      font-size: 14px;
-      margin-top: 4px;
-    }
-    button {
-      padding: 10px;
-      background: #4a90e2;
-      color: white;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      opacity: 0.9;
-    }
-    button:disabled {
-      opacity: 0.5;
-      cursor: default;
-    }
-    .review-card {
-      border: 1px solid #ddd;
-      padding: 12px;
-      border-radius: 4px;
-      margin-bottom: 12px;
-    }
-    .review-header {
-      display: flex;
-      justify-content: space-between;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-    .stars {
-      color: #e3b341;
-    }
+    /* your existing styles… */
   </style>
 </head>
 <body>
 
   <h1>Leave a Review</h1>
-
   <form id="review-form">
-    <label>
-      Your Name
-      <input type="text" id="name" placeholder="e.g. Jane Doe" required />
-    </label>
-
-    <label>
-      Rating
-      <select id="rating">
-        <option value="5">5 ★</option>
-        <option value="4">4 ★</option>
-        <option value="3">3 ★</option>
-        <option value="2">2 ★</option>
-        <option value="1">1 ★</option>
-      </select>
-    </label>
-
-    <label>
-      Your Review
-      <textarea id="review" rows="4" placeholder="Write your thoughts..." required></textarea>
-    </label>
-
+    <!-- name, rating, textarea… -->
     <button type="submit" id="submit-btn" disabled>Submit Review</button>
   </form>
 
-  <div id="reviews-container"></div>
-
   <script>
-    // Firebase config
+    // 1) Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyCnUft1W23MA4Wpx6mzo6IGIBl65Nx4SP0",
       authDomain: "cowel-reviews.firebaseapp.com",
@@ -103,19 +31,16 @@
       messagingSenderId: "1048377700597",
       appId: "1:1048377700597:web:9ca74c4698f88e957e55bc"
     };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
+    // 2) Initialize
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-  </script>
 
-  <script>
+    // 3) Enable button only when fields filled
     const form = document.getElementById('review-form');
     const nameInput = document.getElementById('name');
     const ratingSelect = document.getElementById('rating');
     const reviewInput = document.getElementById('review');
     const submitBtn = document.getElementById('submit-btn');
-    const reviewsContainer = document.getElementById('reviews-container');
 
     [nameInput, reviewInput].forEach(el => {
       el.addEventListener('input', () => {
@@ -123,7 +48,7 @@
       });
     });
 
-    // Submit review to Firebase
+    // 4) On submit, write to Firestore
     form.addEventListener('submit', async e => {
       e.preventDefault();
       const payload = {
@@ -132,42 +57,16 @@
         text: reviewInput.value.trim(),
         date: new Date().toISOString()
       };
-
       try {
         await db.collection('reviews').add(payload);
         alert('Review submitted!');
         form.reset();
         submitBtn.disabled = true;
       } catch (err) {
-        console.error('Error submitting review:', err);
+        console.error(err);
         alert('Failed to submit review. Try again.');
       }
     });
-
-    // Fetch & render reviews in real-time
-    db.collection('reviews')
-      .orderBy('date', 'desc')
-      .onSnapshot(snapshot => {
-        reviewsContainer.innerHTML = '';
-        snapshot.forEach(doc => {
-          renderReviewCard(doc.data());
-        });
-      });
-
-    function renderReviewCard(r) {
-      const card = document.createElement('div');
-      card.className = 'review-card';
-      card.innerHTML = `
-        <div class="review-header">
-          <span>${r.name}</span>
-          <span class="stars">${'★'.repeat(r.rating)}</span>
-        </div>
-        <div class="date">${new Date(r.date).toLocaleString()}</div>
-        <p>${r.text}</p>
-      `;
-      reviewsContainer.append(card);
-    }
   </script>
-
 </body>
 </html>
