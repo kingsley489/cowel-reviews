@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leave a Review</title>
 
-  <!-- Firebase -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
@@ -41,10 +41,6 @@
       cursor: pointer;
       opacity: 0.9;
     }
-    button:disabled {
-      opacity: 0.5;
-      cursor: default;
-    }
     .review-card {
       border: 1px solid #ddd;
       padding: 12px;
@@ -66,63 +62,97 @@
 
   <h1>Leave a Review</h1>
 
- <form id="review-form">
-  <!-- ... -->
-  <button type="submit" id="submit-btn">Submit Review</button>
-</form>
+  <form id="review-form">
+    <label>
+      Your Name
+      <input type="text" id="name" placeholder="e.g. Jane Doe" required />
+    </label>
 
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    // Firebase init…
-    // const db = firebase.firestore(); etc.
+    <label>
+      Rating
+      <select id="rating">
+        <option value="5">5 ★</option>
+        <option value="4">4 ★</option>
+        <option value="3">3 ★</option>
+        <option value="2">2 ★</option>
+        <option value="1">1 ★</option>
+      </select>
+    </label>
 
-    const form = document.getElementById('review-form');
-    const nameInput = document.getElementById('name');
-    const ratingSelect = document.getElementById('rating');
-    const reviewInput = document.getElementById('review');
-    const submitBtn = document.getElementById('submit-btn');
-    const reviewsContainer = document.getElementById('reviews-container');
+    <label>
+      Your Review
+      <textarea id="review" rows="4" placeholder="Write your thoughts..." required></textarea>
+    </label>
 
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const payload = {
-        name: nameInput.value.trim(),
-        rating: parseInt(ratingSelect.value),
-        text: reviewInput.value.trim(),
-        date: new Date().toISOString()
-      };
+    <!-- Button is always active now -->
+    <button type="submit" id="submit-btn">Submit Review</button>
+  </form>
 
-      try {
-        await db.collection('reviews').add(payload);
-        alert('Review submitted!');
-        form.reset();
-      } catch (err) {
-        console.error(err);
-        alert('Failed to submit review. Try again.');
-      }
-    });
+  <div id="reviews-container"></div>
 
-    db.collection('reviews')
-      .orderBy('date', 'desc')
-      .onSnapshot(snapshot => {
-        reviewsContainer.innerHTML = '';
-        snapshot.forEach(doc => {
-          const r = doc.data();
-          const card = document.createElement('div');
-          card.className = 'review-card';
-          card.innerHTML = `
-            <div class="review-header">
-              <span>${r.name}</span>
-              <span class="stars">${'★'.repeat(r.rating)}</span>
-            </div>
-            <div class="date">${new Date(r.date).toLocaleString()}</div>
-            <p>${r.text}</p>
-          `;
-          reviewsContainer.append(card);
-        });
+  <script>
+    // 1) Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnUft1W23MA4Wpx6mzo6IGIBl65Nx4SP0",
+      authDomain: "cowel-reviews.firebaseapp.com",
+      projectId: "cowel-reviews",
+      storageBucket: "cowel-reviews.firebasestorage.app",
+      messagingSenderId: "1048377700597",
+      appId: "1:1048377700597:web:9ca74c4698f88e957e55bc"
+    };
+    // 2) Init Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // 3) DOM ready
+    window.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('review-form');
+      const nameInput = document.getElementById('name');
+      const ratingSelect = document.getElementById('rating');
+      const reviewInput = document.getElementById('review');
+      const reviewsContainer = document.getElementById('reviews-container');
+
+      // 4) Handle form submit
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        const payload = {
+          name: nameInput.value.trim(),
+          rating: parseInt(ratingSelect.value),
+          text: reviewInput.value.trim(),
+          date: new Date().toISOString()
+        };
+        try {
+          await db.collection('reviews').add(payload);
+          alert('Review submitted!');
+          form.reset();
+        } catch (err) {
+          console.error(err);
+          alert('Failed to submit review. Try again.');
+        }
       });
-  });
-</script>
-  
+
+      // 5) Listen & render reviews
+      db.collection('reviews')
+        .orderBy('date', 'desc')
+        .onSnapshot(snapshot => {
+          reviewsContainer.innerHTML = '';
+          snapshot.forEach(doc => {
+            const r = doc.data();
+            const card = document.createElement('div');
+            card.className = 'review-card';
+            card.innerHTML = `
+              <div class="review-header">
+                <span>${r.name}</span>
+                <span class="stars">${'★'.repeat(r.rating)}</span>
+              </div>
+              <div class="date">${new Date(r.date).toLocaleString()}</div>
+              <p>${r.text}</p>
+            `;
+            reviewsContainer.append(card);
+          });
+        });
+    });
+  </script>
+
 </body>
 </html>
